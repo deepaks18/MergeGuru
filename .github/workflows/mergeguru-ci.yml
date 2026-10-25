@@ -1,0 +1,72 @@
+name: MergeGuru CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows-release-gate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Lite dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements-lite.txt
+
+      - name: Run shared engine integration check
+        run: python tools/shared_engine_check.py
+
+      - name: Run canonical health check
+        run: python tools/health_check.py
+
+      - name: Run Lite workflow regression suite
+        run: python tools/lite_v3_release_check.py
+
+      - name: Run high-risk integrity checks
+        run: python tools/high_risk_qa.py
+
+      - name: Run canonical source self-test
+        shell: pwsh
+        run: |
+          $report = Join-Path $env:RUNNER_TEMP "mergeguru-source-selftest.txt"
+          python main_gui_lite_v3.py --self-test $report
+          if ($LASTEXITCODE -ne 0) { throw "Source self-test failed with exit code $LASTEXITCODE." }
+          $text = Get-Content -LiteralPath $report -Raw
+          if ($text -notmatch "RESULT: PASS") { throw "Source self-test report did not pass.`n$text" }
+          $text
+
+      - name: Build Windows executable
+        run: pyinstaller --noconfirm --clean --distpath dist-ci --workpath build-ci MergeGuru_Lite.spec
+
+      - name: Run packaged self-test
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -LiteralPath dist-ci -Filter *.exe | Select-Object -First 1
+          if (-not $exe) { throw "Packaged executable was not created." }
+          $report = Join-Path $env:RUNNER_TEMP "mergeguru-packaged-selftest.txt"
+          $env:MERGEGURU_SELF_TEST_REPORT = $report
+          try {
+            $process = Start-Process -FilePath $exe.FullName -ArgumentList @("--self-test", $report) -PassThru -WindowStyle Hidden
+            if (-not $process.WaitForExit(120000)) {
+              Stop-Process -Id $process.Id -Force
+              throw "Packaged self-test timed out after 120 seconds."
+            }
+            $process.Refresh()
+          }
+          finally {
+            Remove-Item Env:MERGEGURU_SELF_TEST_REPORT -ErrorAction SilentlyContinue
+          }
+          if ($process.ExitCode -ne 0) { throw "Packaged self-test failed with exit code $($process.ExitCode)." }
+          $text = Get-Content -LiteralPath $report -Raw
+          if ($text -notmatch "RESULT: PASS") { throw "Packaged self-test report did not pass.`n$text" }
+          $text

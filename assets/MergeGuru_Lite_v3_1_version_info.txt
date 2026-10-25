@@ -1,0 +1,30 @@
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    filevers=(3, 1, 0, 0),
+    prodvers=(3, 1, 0, 0),
+    mask=0x3f,
+    flags=0x2,
+    OS=0x40004,
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0)
+  ),
+  kids=[
+    StringFileInfo([
+      StringTable(
+        '040904B0',
+        [
+          StringStruct('CompanyName', 'MergeGuru'),
+          StringStruct('FileDescription', 'MergeGuru Lite v3.1 Preview'),
+          StringStruct('FileVersion', '3.1.0-preview'),
+          StringStruct('InternalName', 'MergeGuru_Lite_v3_1_Preview'),
+          StringStruct('LegalCopyright', 'Internal business software'),
+          StringStruct('OriginalFilename', 'MergeGuru_Lite_v3_1_Preview.exe'),
+          StringStruct('ProductName', 'MergeGuru Lite'),
+          StringStruct('ProductVersion', '3.1.0-preview')
+        ]
+      )
+    ]),
+    VarFileInfo([VarStruct('Translation', [1033, 1200])])
+  ]
+)
