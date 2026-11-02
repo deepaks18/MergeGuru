@@ -1,14 +1,14 @@
 # Record the MergeGuru showcase
 
-**Target:** a 60–90 second recording of the documented Lite v3 workflow, using synthetic CSVs. This is a capture plan, not a completed run or benchmark.
+**Target:** a 60–90 second recording of the committed Lite v3.1 candidate workflow using synthetic CSVs. This plan describes an implemented workflow, not a completed demo run or benchmark.
 
 ## Before capture
 
-- Identify the actual executable/version. The application is not included in this repository at package creation.
+- Record the source revision and actual application version. The source is included on current `main`; use `main_gui_lite_v3.py` or an explicitly identified Windows build. For an executable, record its SHA-256, signature status and packaged self-test result. The latest reviewed CI run did not reach packaging, and no published GitHub Release was available at review.
 - Use a disposable folder containing only the following three files. Save as UTF-8 CSV. All rows and identifiers below are invented.
 - Select `01-reference.csv` as the template. Keep default required-column validation.
 - Use a clean output folder outside the source folder.
-- Confirm the current build exposes CSV-Unique text and its protected-text controls before recording.
+- CSV-Unique text and protected-column controls are implemented in current source. Before recording, confirm that the selected build exposes these controls and select RecordID for protection.
 
 ### 01-reference.csv
 
@@ -43,7 +43,7 @@ RecordID,Category
 | 48–62 seconds | Change the filter to Wallet only; preview | “Change the subset using the prepared data.” |
 | 62–90 seconds | CSV-Unique text export; protected RecordID; output and audit | “Export the subset, then reconcile the records, identifiers and audit.” |
 
-These are editing targets, not processing-time estimates. If preparation takes longer, cut with a visible “elapsed time omitted” label. Do not imply real-time performance from edited footage. A visual alone cannot prove no rereads: describe caching as documented behavior unless confirmed with a suitable current-build check.
+These are editing targets, not processing-time estimates. If preparation takes longer, cut with a visible “elapsed time omitted” label. Do not imply real-time performance from edited footage. Cached re-filtering is implemented against the prepared in-memory dataframe. Describe this as source-backed behavior; footage alone does not prove the absence of source reads. Any claim about observed reads in the captured build requires instrumentation.
 
 ## Reconcile before publishing
 
@@ -55,10 +55,10 @@ Expected from the synthetic inputs, **not observed application results**:
 | Prepared data | 4 rows; Amount total 1,000 |
 | Wa category selection | Wallet + Water; 3 rows; Amount total 800 |
 | Wallet-only selection | 2 rows; Amount total 400 |
-| Wallet-only RecordID values | 000101 and 000103, retaining leading zeros |
-| Successful export | Adjacent human-readable audit file |
+| Wallet-only RecordID values | Logical identifiers 000101 and 000103. Current CSV-Unique text serialization wraps protected values in apostrophes: `'000101'` and `'000103'`. |
+| Export and audit | Completed data output plus an adjacent human-readable audit file. Audit writing can fail after data export succeeds; confirm the file exists and reconcile its contents. |
 
-Inspect CSV text in a text editor. Excel may reinterpret identifiers when opening CSV; reopening it directly in Excel is not evidence of raw text preservation. Check the current build's protected-text behavior rather than assuming its UI or serialization.
+Inspect the raw CSV in a text editor. Current CSV-Unique text serialization adds surrounding apostrophes to protected values; confirm that representation explicitly. Excel may reinterpret CSV values, so opening the file directly in Excel does not establish raw serialization or compatibility with every downstream tool.
 
 If any expected result differs, stop capture, investigate and update the evidence status. Do not silently change the expected count.
 
@@ -81,6 +81,6 @@ Once captured, insert relative media links in SHOWCASE.md and add the executable
 
 ## Optional second cut
 
-Show cancelling a CSV/Excel export to an existing destination and verify that the destination bytes remain unchanged. Historical Beta QA covers this behavior, but a new recording must check the actual build. Keep this out of the primary 90-second flow unless it remains clear and readable.
+Show cancelling a CSV/Excel export to an existing destination and verify that the destination bytes remain unchanged. Atomic replacement and cancellation protection are implemented in current source, and local cancellation/writer-failure coverage is documented. The latest reviewed CI high-risk integrity step failed, so verify the selected build and compare destination bytes before and after cancellation. Keep this out of the primary 90-second flow unless it remains clear and readable.
 
-Do not include v3.1 project presets in a v3 Beta recording. If recording v3.1, label it as a separate preview and verify its current state first.
+Record the active v3.1 candidate and label its exact revision and build. Project presets may be shown as an optional separate segment because they are implemented in current source. If using an older Beta build, label it explicitly and exclude v3.1-only behavior.
